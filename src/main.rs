@@ -1,5 +1,7 @@
-use std::env;
 use std::fs;
+
+#[macro_use]
+extern crate clap;
 
 enum Preamble {
     Comment(String),
@@ -87,11 +89,14 @@ fn split_preamble(contents: &str) -> (Vec<Preamble>, std::iter::Peekable<std::st
     (preamble_vec, lines)
 }
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
+use clap::App;
 
-    let filename = &args[1];
-    //println!("In file {}", filename);
+fn main() {
+    let yaml = load_yaml!("cli.yml");
+    let matches = App::from_yaml(yaml).get_matches();
+
+    let filename = matches.value_of("INPUT").unwrap();
+    println!("Using input file: {}", filename);
 
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
 

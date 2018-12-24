@@ -1,0 +1,9 @@
+name: satysfi-fmt
+version: "0.1.0"
+author: "hsjoihs <hs.ioling.hs@gmail.com>"
+about: A formatter for SATySFi
+args:
+    - INPUT:
+        help: Sets the input file to use
+        required: true
+        index: 1

@@ -9,17 +9,28 @@ enum Preamble {
 
 #[test]
 fn it_works() {
-    remove_prefix("%abc", "%").unwrap();
-    assert!(remove_prefix("%abc", "@").is_none())
+    if let crate::Foo::Removed(_s) = remove_prefix("%abc", "%") {
+    } else {
+        panic!()
+    }
+    if let crate::Foo::NotRemoved(_s) = remove_prefix("%abc", "@") {
+    } else {
+        panic!()
+    }
 }
 
-fn remove_prefix<'a>(input: &'a str, pattern: &str) -> Option<&'a str> {
+enum Foo<'a> {
+    Removed(&'a str),
+    NotRemoved(&'a str),
+}
+
+fn remove_prefix<'a>(input: &'a str, pattern: &str) -> Foo<'a> {
     if input.starts_with(pattern) {
         let (pat, ans) = input.split_at(pattern.len());
-        assert_eq!(pat, pattern);
-        Some(ans)
+        debug_assert_eq!(pat, pattern);
+        crate::Foo::Removed(ans)
     } else {
-        None
+        crate::Foo::NotRemoved(input)
     }
 }
 
@@ -29,24 +40,40 @@ fn split_preamble(contents: &str) -> (Vec<Preamble>, std::iter::Peekable<std::st
     let mut lines = contents.lines().peekable();
     let mut preamble_vec = vec![];
     while let Some(line) = lines.peek() {
-        let trimmed = line.trim_start();
+        let mut trimmed = line.trim_start();
         if trimmed.is_empty() {
             lines.next();
             continue;
         }
 
-        if trimmed.starts_with("%") {
-            let content = trimmed.split_at("%".len()).1.trim_start();
-            preamble_vec.push(crate::Preamble::Comment(content.to_string()));
-            lines.next();
-            continue;
-        } else if trimmed.starts_with("@import:") {
-            let content = trimmed.split_at("@import:".len()).1.trim_start();
-            preamble_vec.push(crate::Preamble::Import(content.to_string()));
-            lines.next();
-            continue;
-        } else if trimmed.starts_with("@require:") {
-            let content = trimmed.split_at("@require:".len()).1.trim_start();
+        match remove_prefix(trimmed, "%") {
+            crate::Foo::Removed(c) => {
+                let content = c.trim_start();
+                preamble_vec.push(crate::Preamble::Comment(content.to_string()));
+                lines.next();
+                continue;
+            }
+            crate::Foo::NotRemoved(l) => {
+                trimmed = l;
+            }
+        }
+
+        match remove_prefix(trimmed, "@import:") {
+            crate::Foo::Removed(c) => {
+                let content = c.trim_start_matches(' ');
+                // only U+0020s that start the file name are allowed after the colon
+                preamble_vec.push(crate::Preamble::Import(content.to_string()));
+                lines.next();
+                continue;
+            }
+            crate::Foo::NotRemoved(l) => {
+                trimmed = l;
+            }
+        }
+
+        if let crate::Foo::Removed(c) = remove_prefix(trimmed, "@require:") {
+            let content = c.trim_start_matches(' ');
+            // only U+0020s that start the file name are allowed after the colon
             preamble_vec.push(crate::Preamble::Require(content.to_string()));
             lines.next();
             continue;

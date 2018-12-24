@@ -1,5 +1,5 @@
 name: satysfi-fmt
-version: "0.1.0"
+version: "0.1.1"
 author: "hsjoihs <hs.ioling.hs@gmail.com>"
 about: A formatter for SATySFi
 args:

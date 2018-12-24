@@ -1,0 +1,10 @@
+@require: stdjabook
+document (|
+  title = {test1};
+  author = {__};
+  show-title = true;
+  show-toc = false;
+|) '<
+  +section{}<
+  >
+>

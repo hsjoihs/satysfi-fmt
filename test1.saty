@@ -1,0 +1,17 @@
+@require: stdjabook
+   % abc
+     @require: code
+  @require:       itemize
+	@require: tabular
+@require: math
+@import: test2
+
+document (|
+  title = {test1};
+  author = {__};
+  show-title = true;
+  show-toc = false;
+|) '<
+  +section{}<
+  >
+>

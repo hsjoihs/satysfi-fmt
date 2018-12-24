@@ -1,0 +1,8 @@
+@require: myenbook
+@require: hdecoset
+@require: vdecoset
+@require: code
+@require: list
+
+let-block ctx +centering it =
+  line-break true true ctx (inline-fil ++ read-inline ctx it ++ inline-fil)
